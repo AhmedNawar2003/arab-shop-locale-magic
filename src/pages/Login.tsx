@@ -10,26 +10,54 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { Eye, EyeOff } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema, type LoginFormData } from '@/lib/validation';
+import { sanitizeFormData } from '@/lib/sanitize';
+import { toast } from '@/hooks/use-toast';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 const LoginContent = () => {
   const { t } = useLanguage();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  const handleSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     
-    // TODO: Implement actual login logic when backend is connected
-    console.log('Login attempt:', { email, password });
-    
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Sanitize input data
+      const sanitizedData = sanitizeFormData(data);
+      
+      // TODO: Implement actual login logic when backend is connected
+      // Remove this log before production - for development only
+      console.log('Login attempt for email:', sanitizedData.email);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        title: t('loginSuccess') || 'Login successful',
+        description: t('welcomeBack') || 'Welcome back!',
+      });
+      
+    } catch (error) {
+      toast({
+        title: t('loginError') || 'Login failed',
+        description: t('invalidCredentials') || 'Invalid email or password',
+        variant: 'destructive',
+      });
+    } finally {
       setIsLoading(false);
-      // Handle login response
-    }, 1000);
+    }
   };
 
   return (
@@ -43,64 +71,74 @@ const LoginContent = () => {
               <p className="text-gray-600 mt-2">{t('loginDescription')}</p>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium mb-2">
-                    {t('email')}
-                  </label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={t('emailPlaceholder')}
-                    required
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('email')}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder={t('emailPlaceholder')}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
 
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium mb-2">
-                    {t('password')}
-                  </label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder={t('passwordPlaceholder')}
-                      required
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute left-auto right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('password')}</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type={showPassword ? 'text' : 'password'}
+                              placeholder={t('passwordPlaceholder')}
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute left-auto right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center">
+                      <input type="checkbox" className="mr-2" />
+                      <span className="text-sm text-gray-600">{t('rememberMe')}</span>
+                    </label>
+                    <Link to="#" className="text-sm text-primary hover:underline">
+                      {t('forgotPassword')}
+                    </Link>
                   </div>
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center">
-                    <input type="checkbox" className="mr-2" />
-                    <span className="text-sm text-gray-600">{t('rememberMe')}</span>
-                  </label>
-                  <Link to="#" className="text-sm text-primary hover:underline">
-                    {t('forgotPassword')}
-                  </Link>
-                </div>
-
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? t('loggingIn') : t('login')}
-                </Button>
-              </form>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? t('loggingIn') : t('login')}
+                  </Button>
+                </form>
+              </Form>
 
               <div className="mt-6 text-center">
                 <p className="text-gray-600">
