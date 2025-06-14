@@ -1,18 +1,11 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, Globe } from 'lucide-react';
+import { ShoppingCart, Globe, User } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { CartSheet } from './CartSheet';
 
 export const Header = () => {
@@ -29,37 +22,39 @@ export const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <h1 className="text-2xl font-bold text-primary">
-              {isRTL ? 'منزلي' : 'HomeShop'}
-            </h1>
+            <Link to="/">
+              <h1 className="text-2xl font-bold text-primary">
+                {isRTL ? 'منزلي' : 'HomeShop'}
+              </h1>
+            </Link>
           </div>
 
           {/* Navigation */}
           <nav className="hidden md:flex space-x-8 rtl:space-x-reverse">
-            <a 
-              href="#" 
+            <Link 
+              to="/" 
               className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               {t('home')}
-            </a>
-            <a 
-              href="#products" 
+            </Link>
+            <Link 
+              to="/shop" 
               className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
-              {t('products')}
-            </a>
-            <a 
-              href="#" 
+              {t('shop')}
+            </Link>
+            <Link 
+              to="#" 
               className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               {t('about')}
-            </a>
-            <a 
-              href="#" 
+            </Link>
+            <Link 
+              to="#" 
               className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               {t('contact')}
-            </a>
+            </Link>
           </nav>
 
           {/* Right side actions */}
@@ -74,6 +69,14 @@ export const Header = () => {
               <Globe className="h-4 w-4" />
               {language === 'ar' ? 'EN' : 'عر'}
             </Button>
+
+            {/* Login */}
+            <Link to="/login">
+              <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                {t('login')}
+              </Button>
+            </Link>
 
             {/* Cart */}
             <CartSheet>
