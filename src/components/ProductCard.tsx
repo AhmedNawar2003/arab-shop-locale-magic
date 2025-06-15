@@ -5,7 +5,8 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Product } from '@/types/product';
-import { useLanguage } from '@/contexts/LanguageContext';
+import WishlistButton from './WishlistButton';
+import { useTranslation } from 'react-i18next';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from '@/hooks/use-toast';
 
@@ -14,15 +15,13 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const { addToCart } = useCart();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
     if (!product.inStock) return;
-    
     addToCart(product);
     toast({
       title: t('addToCart'),
@@ -50,7 +49,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             )}
           </div>
         </CardHeader>
-        
         <CardContent className="p-4 flex-1">
           <h3 className="font-semibold text-lg mb-2 line-clamp-1">
             {t(product.nameKey)}
@@ -67,15 +65,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </Badge>
           </div>
         </CardContent>
-        
-        <CardFooter className="p-4 pt-0">
+        <CardFooter className="p-4 pt-0 flex gap-2">
           <Button 
-            className="w-full" 
+            className="flex-1" 
             onClick={handleAddToCart}
             disabled={!product.inStock}
           >
             {t('addToCart')}
           </Button>
+          <WishlistButton product={product} />
         </CardFooter>
       </Card>
     </Link>
